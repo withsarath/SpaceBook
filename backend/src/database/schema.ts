@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   passwordHash: varchar('password_hash', { length: 255 }).notNull(),
   phone: varchar('phone', { length: 20 }),
   isActive: varchar('is_active', { length: 10 }).notNull().default('true'),
+  refreshTokenHash: varchar('refresh_token_hash', { length: 255 }),
   createdAt: timestamp('created_at', {
     withTimezone: true,
   })
@@ -29,20 +30,24 @@ export const roles = pgTable('roles', {
   name: roleNameEnum('name').notNull().unique(),
 });
 
-export const userRoles = pgTable('user_roles', {
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  roleId: uuid('role_id')
-    .notNull()
-    .references(() => roles.id, { onDelete: 'cascade' }),
-  createdAt: timestamp('created_at', {
-    withTimezone: true,
-  })
-    .defaultNow()
-    .notNull(),
-}, (table)=>[
-    primaryKey({
-        columns: [table.userId, table.roleId]
+export const userRoles = pgTable(
+  'user_roles',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    roleId: uuid('role_id')
+      .notNull()
+      .references(() => roles.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
     })
-]);
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.userId, table.roleId],
+    }),
+  ],
+);
