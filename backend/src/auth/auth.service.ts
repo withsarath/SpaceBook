@@ -1,7 +1,6 @@
 import {
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
@@ -10,9 +9,12 @@ import { eq } from 'drizzle-orm';
 import { users } from '../database/schema';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
+  constructor(private readonly jwtService: JwtService) {}
+
   async register(dto: RegisterDto) {
     const { email } = dto;
     const existingUser = await db.query.users.findFirst({
@@ -49,19 +51,39 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invaild Email or Password');
     }
-    const isMatch = await bcrypt.compare(dto.password, user.passwordHash)
+    const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
 
-    if(!isMatch){
-        throw new UnauthorizedException('Invaild email or password')
+    if (!isMatch) {
+      throw new UnauthorizedException('Invaild email or password');
     }
+    const accessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+    });
+    const refreshToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      },
+      { expiresIn: '7d' },
+    );
+
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 12);
+    await db
+      .update(users)
+      .set({ refreshTokenHash })
+      .where(eq(users.id, user.id));
+
     return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    isActive: user.isActive,
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt
-};
+      accessToken,
+      refreshToken,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }
