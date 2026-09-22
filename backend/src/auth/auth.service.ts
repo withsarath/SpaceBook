@@ -10,11 +10,13 @@ import { users } from '../database/schema';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
+  // Register user
   async register(dto: RegisterDto) {
     const { email } = dto;
     const existingUser = await db.query.users.findFirst({
@@ -44,6 +46,7 @@ export class AuthService {
     };
   }
 
+  //Login user
   async login(dto: LoginDto) {
     const user = await db.query.users.findFirst({
       where: eq(users.email, dto.email),
@@ -56,10 +59,14 @@ export class AuthService {
     if (!isMatch) {
       throw new UnauthorizedException('Invaild email or password');
     }
+
+    // Creating accesstoken with shorter lifespan
     const accessToken = await this.jwtService.signAsync({
       sub: user.id,
       email: user.email,
     });
+
+    // Creating refresh token with more lifespan
     const refreshToken = await this.jwtService.signAsync(
       {
         sub: user.id,
@@ -68,6 +75,7 @@ export class AuthService {
       { expiresIn: '7d' },
     );
 
+    // hashing refresh token to store
     const refreshTokenHash = await bcrypt.hash(refreshToken, 12);
     await db
       .update(users)
@@ -85,5 +93,65 @@ export class AuthService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  // Refresh token
+  async refresh(dto: RefreshTokenDto) {
+    const payload = await this.jwtService.verifyAsync(dto.refreshToken);
+
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, payload.sub),
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.refreshTokenHash) {
+      throw new UnauthorizedException('Token not found');
+    }
+
+    const isValid = await bcrypt.compare(
+      dto.refreshToken,
+      user.refreshTokenHash,
+    );
+
+    if (!isValid) {
+      throw new UnauthorizedException('Token is not valid');
+    }
+
+    const newAccessToken = await this.jwtService.signAsync({
+      sub: user.id,
+      email: user.email,
+    });
+
+    const newRefreshToken = await this.jwtService.signAsync(
+      {
+        sub: user.id,
+        email: user.email,
+      },
+      { expiresIn: '7d' },
+    );
+
+    const newRefreshTokenHash = await bcrypt.hash(newRefreshToken, 12);
+    await db
+      .update(users)
+      .set({ refreshTokenHash: newRefreshTokenHash })
+      .where(eq(users.id, user.id));
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    };
+  }
+
+  //Logout
+  async logout(userId: string) {
+    await db
+      .update(users)
+      .set({ refreshTokenHash: null })
+      .where(eq(users.id, userId));
+
+    return {message: "Logged out successfully"}
   }
 }
