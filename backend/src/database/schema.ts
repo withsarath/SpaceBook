@@ -2,7 +2,13 @@ import { primaryKey } from 'drizzle-orm/pg-core';
 import { pgEnum } from 'drizzle-orm/pg-core';
 import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
 
+// enums
 export const roleNameEnum = pgEnum('role_name', ['customer', 'owner', 'admin']);
+export const ownerApplicationStatusEnum = pgEnum('owner_application_status', [
+  'pending',
+  'approved',
+  'rejected',
+]);
 
 // users table
 export const users = pgTable('users', {
@@ -25,11 +31,13 @@ export const users = pgTable('users', {
     .notNull(),
 });
 
+//roles table
 export const roles = pgTable('roles', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: roleNameEnum('name').notNull().unique(),
 });
 
+// user roles tables
 export const userRoles = pgTable(
   'user_roles',
   {
@@ -51,3 +59,31 @@ export const userRoles = pgTable(
     }),
   ],
 );
+// owner-application table
+export const ownerApplications = pgTable('owner_applications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  businessName: varchar('business_name', { length: 150 }).notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  reason: varchar('reason', { length: 255 }).notNull(),
+  status: ownerApplicationStatusEnum('status').notNull().default('pending'),
+  reviewedBy: uuid('reviewed_by').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+  reviewedAt: timestamp('reviewed_at', {
+    withTimezone: true,
+  }),
+  rejectionReason: varchar('rejection_reason', { length: 255 }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});
