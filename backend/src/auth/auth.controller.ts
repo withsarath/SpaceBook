@@ -5,6 +5,8 @@ import { LoginDto } from './dto/login.dto';
 import type { Request } from 'express';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { RolesGuard } from './guards/roles.guard';
+import { Roles } from './decorators/roles.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -43,7 +45,8 @@ export class AuthController {
       };
     },
   ) {
-    const user = req.user
+    const user = req.user;
     return await this.authservice.logout(user.userId);
   }
+
 }
