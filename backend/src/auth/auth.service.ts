@@ -1,12 +1,13 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
 import { db } from '../database/db';
 import { eq } from 'drizzle-orm';
-import { users } from '../database/schema';
+import { roles, userRoles, users } from '../database/schema';
 import * as bcrypt from 'bcryptjs';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
@@ -18,6 +19,7 @@ export class AuthService {
 
   // Register user
   async register(dto: RegisterDto) {
+    //checking the user is already exists
     const { email } = dto;
     const existingUser = await db.query.users.findFirst({
       where: eq(users.email, email),
@@ -25,7 +27,9 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('User with this email already exists!');
     }
+    //password hashed for storing database instead for raw password
     const passwordHash = await bcrypt.hash(dto.password, 12);
+    // inserting user into database
     const user = await db
       .insert(users)
       .values({
@@ -34,7 +38,24 @@ export class AuthService {
         passwordHash,
       })
       .returning();
+
+    //destructuring the user
     const [createdUser] = user;
+
+    // find the customer
+    const customerRole = await db.query.roles.findFirst({
+      where: eq(roles.name, 'customer'),
+    });
+
+    if (!customerRole) {
+      throw new InternalServerErrorException('Customer role not found');
+    }
+
+    // adding the role 
+    await db.insert(userRoles).values({
+      userId: createdUser.id,
+      roleId: customerRole.id,
+    });
     return {
       id: createdUser.id,
       name: createdUser.name,
@@ -152,6 +173,6 @@ export class AuthService {
       .set({ refreshTokenHash: null })
       .where(eq(users.id, userId));
 
-    return {message: "Logged out successfully"}
+    return { message: 'Logged out successfully' };
   }
 }
