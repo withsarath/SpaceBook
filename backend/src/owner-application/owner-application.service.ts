@@ -8,6 +8,7 @@ import { CreateOwnerApplicationDto } from './dto/create-owner-application.dto';
 import { db } from '../database/db';
 import { ownerApplications, roles, userRoles, users } from '../database/schema';
 import { and, desc, eq } from 'drizzle-orm';
+import { RejectOwnerApplicationDto } from './dto/reject-owner-application.dto';
 
 @Injectable()
 export class OwnerApplicationService {
@@ -98,6 +99,42 @@ export class OwnerApplicationService {
         .update(ownerApplications)
         .set({
           status: 'approved',
+          reviewedBy: adminId,
+          reviewedAt: new Date(),
+        })
+        .where(eq(ownerApplications.id, applicationId))
+        .returning();
+
+      return updatedApplication;
+    });
+  }
+ async rejectApplication(applicationId: string, adminId: string, dto: RejectOwnerApplicationDto) {
+    return db.transaction(async (tx) => {
+      // 1. Find the application
+      const [application] = await tx
+        .select()
+        .from(ownerApplications)
+        .where(eq(ownerApplications.id, applicationId))
+        .limit(1);
+
+      if (!application) {
+        throw new NotFoundException('Application not found');
+      }
+
+      // 2. Ensure the application is still pending
+      if (application.status !== 'pending') {
+        throw new ConflictException(
+          'This application has already been reviewed',
+        );
+      }
+
+
+      // 5. Update the application status
+      const [updatedApplication] = await tx
+        .update(ownerApplications)
+        .set({
+          status: 'rejected',
+          rejectionReason: dto.reason,
           reviewedBy: adminId,
           reviewedAt: new Date(),
         })
