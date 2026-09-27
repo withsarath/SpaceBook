@@ -1,6 +1,13 @@
+import { jsonb } from 'drizzle-orm/pg-core';
 import { primaryKey } from 'drizzle-orm/pg-core';
 import { pgEnum } from 'drizzle-orm/pg-core';
-import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  boolean,
+} from 'drizzle-orm/pg-core';
 
 // enums
 export const roleNameEnum = pgEnum('role_name', ['customer', 'owner', 'admin']);
@@ -76,6 +83,31 @@ export const ownerApplications = pgTable('owner_applications', {
     withTimezone: true,
   }),
   rejectionReason: varchar('rejection_reason', { length: 255 }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});
+
+export const workspaces = pgTable('workspaces', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 150 }).notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  address: varchar('address', { length: 255 }).notNull(),
+  city: varchar('city', { length: 150 }).notNull(),
+  country: varchar('country', { length: 255 }).notNull(),
+  amenities: jsonb('amenities').$type<string[]>().notNull().default([]),
+  imageUrl: varchar('image_url', { length: 500 }),
+  isActive: boolean('is_active').notNull().default(true),
   createdAt: timestamp('created_at', {
     withTimezone: true,
   })
