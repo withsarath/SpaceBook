@@ -11,12 +11,12 @@ const pool = new Pool({
   keepAlive: true, // Send TCP keepalive packets to prevent Neon from dropping
 });
 
-// pool.on("connect", () => {
-//   console.log("Database connected successfully ✅");
-// });
-// pool.on("error", (err) => {
-//   console.error("Database connection error:", err);
-// });
+pool.on("connect", () => {
+  console.log("Database connected successfully ✅");
+});
+pool.on("error", (err) => {
+  console.error("Database connection error:", err);
+});
 pool.on("error", (err) => {
   // Catch background drops so the node process doesn't crash on pooler disconnects
   console.warn("Neon pooler dropped an idle client (safely handled):", err.message);
