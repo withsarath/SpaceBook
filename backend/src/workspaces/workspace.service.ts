@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspaces.dto';
 import { db } from '../database/db';
 import { workspaces } from '../database/schema';
+import { and, eq } from 'drizzle-orm';
 
 @Injectable()
 export class WorkspaceService {
@@ -21,5 +22,18 @@ export class WorkspaceService {
       .returning();
 
     return workspace;
+  }
+  async getWorkspace(id: string, userId) {
+    const workspace = await db
+      .select()
+      .from(workspaces)
+      .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, userId)))
+      .limit(1);
+
+    if (workspace.length === 0) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    return workspace[0];
   }
 }
