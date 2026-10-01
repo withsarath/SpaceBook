@@ -7,6 +7,10 @@ import { UpdateWorkspaceDto } from './dto/update-workspaces.dto';
 
 @Injectable()
 export class WorkspaceService {
+  async getAllWorkspaces() {
+    const result = await db.select().from(workspaces);
+    return result;
+  }
   async createWorkspace(userId: string, dto: CreateWorkspaceDto) {
     const [workspace] = await db
       .insert(workspaces)
@@ -38,42 +42,52 @@ export class WorkspaceService {
     return workspace[0];
   }
   async updateWorkspace(id: string, userId: string, dto: UpdateWorkspaceDto) {
-  const existWorkspace = await db
-    .select()
-    .from(workspaces)
-    .where(
-      and(
-        eq(workspaces.id, id),
-        eq(workspaces.ownerId, userId),
-      ),
-    )
-    .limit(1);
+    const existWorkspace = await db
+      .select()
+      .from(workspaces)
+      .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, userId)))
+      .limit(1);
 
-  if (existWorkspace.length === 0) {
-    throw new NotFoundException('Workspace Not Found!!');
+    if (existWorkspace.length === 0) {
+      throw new NotFoundException('Workspace Not Found!!');
+    }
+
+    const updateData = {
+      ...(dto.name !== undefined && { name: dto.name }),
+      ...(dto.description !== undefined && { description: dto.description }),
+      ...(dto.address !== undefined && { address: dto.address }),
+      ...(dto.city !== undefined && { city: dto.city }),
+      ...(dto.country !== undefined && { country: dto.country }),
+      ...(dto.amenities !== undefined && { amenities: dto.amenities }),
+      ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
+    };
+
+    const [workspace] = await db
+      .update(workspaces)
+      .set(updateData)
+      .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, userId)))
+      .returning();
+
+    return workspace;
   }
 
-  const updateData = {
-    ...(dto.name !== undefined && { name: dto.name }),
-    ...(dto.description !== undefined && { description: dto.description }),
-    ...(dto.address !== undefined && { address: dto.address }),
-    ...(dto.city !== undefined && { city: dto.city }),
-    ...(dto.country !== undefined && { country: dto.country }),
-    ...(dto.amenities !== undefined && { amenities: dto.amenities }),
-    ...(dto.imageUrl !== undefined && { imageUrl: dto.imageUrl }),
-  };
+  async deleteWorkspce(id: string, userId: string) {
+    const existWorkspace = await db
+      .select()
+      .from(workspaces)
+      .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, userId)))
+      .limit(1);
 
-  const [workspace] = await db
-    .update(workspaces)
-    .set(updateData)
-    .where(
-      and(
-        eq(workspaces.id, id),
-        eq(workspaces.ownerId, userId),
-      ),
-    )
-    .returning();
+    if (existWorkspace.length === 0) {
+      throw new NotFoundException('Workspace Not Found!!');
+    }
 
-  return workspace;
-}
+    await db
+      .delete(workspaces)
+      .where(and(eq(workspaces.id, id), eq(workspaces.ownerId, userId)));
+
+    return {
+      message: 'Workspace deleted successfully',
+    };
+  }
 }

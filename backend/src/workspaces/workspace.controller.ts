@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -19,6 +20,11 @@ import { UpdateWorkspaceDto } from './dto/update-workspaces.dto';
 @Controller('workspaces')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
+
+  @Get()
+  async getAllWorkspaces() {
+    return this.workspaceService.getAllWorkspaces();
+  }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -55,5 +61,15 @@ export class WorkspaceController {
     @Body() dto: UpdateWorkspaceDto,
   ) {
     return this.workspaceService.updateWorkspace(id, req.user.userId, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('owner')
+  async deleteWorkspace(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { userId: string; email: string } },
+  ) {
+    return this.workspaceService.deleteWorkspce(id, req.user.userId)
   }
 }
