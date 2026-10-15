@@ -41,6 +41,20 @@ export class OwnerApplicationController {
     );
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMyApplication(
+    @Req()
+    req: Request & {
+      user: {
+        userId: string;
+        email: string;
+      };
+    },
+  ) {
+    return this.ownerApplicationsService.getMyApplication(req.user.userId);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')

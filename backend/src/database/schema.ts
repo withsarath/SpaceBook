@@ -7,6 +7,7 @@ import {
   varchar,
   timestamp,
   boolean,
+  integer,
 } from 'drizzle-orm/pg-core';
 
 // enums
@@ -119,3 +120,31 @@ export const workspaces = pgTable('workspaces', {
     .defaultNow()
     .notNull(),
 });
+
+// bookings table
+export const bookings = pgTable('bookings', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  bookingDate: varchar('booking_date', { length: 50 }).notNull(),
+  startTime: varchar('start_time', { length: 20 }).notNull(),
+  endTime: varchar('end_time', { length: 20 }).notNull(),
+  seats: integer('seats').notNull().default(1),
+  status: varchar('status', { length: 30 }).notNull().default('confirmed'),
+  notes: varchar('notes', { length: 255 }),
+  createdAt: timestamp('created_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+  updatedAt: timestamp('updated_at', {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+});
+

@@ -42,14 +42,18 @@ export class WorkspaceController {
     return this.workspaceService.createWorkspace(req.user.userId, dto);
   }
 
-  @Get(':id')
+  @Get('my')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('owner')
-  async getWorkspace(
-    @Param('id') id: string,
+  async getMyWorkspaces(
     @Req() req: Request & { user: { userId: string; email: string } },
   ) {
-    return this.workspaceService.getWorkspace(id, req.user.userId);
+    return this.workspaceService.getMyWorkspaces(req.user.userId);
+  }
+
+  @Get(':id')
+  async getWorkspace(@Param('id') id: string) {
+    return this.workspaceService.getWorkspaceById(id);
   }
 
   @Patch(':id')

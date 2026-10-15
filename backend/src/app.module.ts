@@ -5,11 +5,19 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { OwnerApplicationModule } from './owner-application/owner-application.module';
 import { WorkspaceModule } from './workspaces/workspace.module';
+import { BookingsModule } from './bookings/bookings.module';
+
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    expandVariables: true
-  }),AuthModule, OwnerApplicationModule, WorkspaceModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      expandVariables: true,
+    }),
+    AuthModule,
+    OwnerApplicationModule,
+    WorkspaceModule,
+    BookingsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
