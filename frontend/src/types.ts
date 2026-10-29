@@ -19,6 +19,17 @@ export interface Workspace {
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
+
+  // Realistic marketplace enriched fields
+  pricePerHour?: number;
+  rating?: number;
+  reviewCount?: number;
+  capacity?: number;
+  spaceType?: string;
+  isSuperhost?: boolean;
+  hostName?: string;
+  responseTime?: string;
+  instantBook?: boolean;
 }
 
 export interface Booking {
@@ -39,6 +50,7 @@ export interface Booking {
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string | null;
+  totalPrice?: number;
 }
 
 export interface OwnerApplication {

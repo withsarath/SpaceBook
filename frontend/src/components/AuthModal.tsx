@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Mail, User as UserIcon, Phone, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Lock, Mail, User as UserIcon, Phone, AlertCircle, ArrowRight } from 'lucide-react';
 import { authApi, setToken } from '../api';
 import type { User } from '../types';
 
@@ -45,7 +45,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       } else {
         await authApi.register(name, email, password, phone);
-        // Automatically log in after registration
         const loginRes = await authApi.login(email, password);
         setToken(loginRes.accessToken);
         onSuccess({
@@ -58,7 +57,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClose();
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please try again.');
+      setError(err.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -70,42 +69,74 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl text-slate-900">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-800 bg-slate-850">
+        <div className="flex items-center justify-between p-6 border-b border-slate-100">
           <div>
-            <h2 className="text-xl font-bold text-white">
-              {mode === 'login' ? 'Welcome Back' : 'Create an Account'}
+            <h2 className="text-xl font-extrabold text-slate-900">
+              {mode === 'login' ? 'Welcome back' : 'Create an account'}
             </h2>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-0.5">
               {mode === 'login'
-                ? 'Sign in to access your space bookings'
-                : 'Join SpaceBook to discover and reserve workspaces'}
+                ? 'Sign in to access your space bookings and host tools'
+                : 'Join SpaceBook to book and list professional spaces'}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+            className="text-slate-400 hover:text-slate-700 p-2 rounded-full hover:bg-slate-100 transition"
           >
             <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Tab Toggle */}
+        <div className="grid grid-cols-2 p-1.5 mx-6 mt-4 bg-slate-100 rounded-xl text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => {
+              setMode('login');
+              setError(null);
+            }}
+            className={`py-2 rounded-lg transition ${
+              mode === 'login'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode('register');
+              setError(null);
+            }}
+            className={`py-2 rounded-lg transition ${
+              mode === 'register'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            Register
           </button>
         </div>
 
         {/* Form Body */}
         <div className="p-6">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 flex items-start gap-2.5 text-rose-300 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2.5 text-rose-700 text-xs">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3.5">
             {mode === 'register' && (
               <>
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Full Name
                   </label>
                   <div className="relative">
@@ -115,14 +146,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Alex Johnson"
-                      className="w-full bg-slate-800/80 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      placeholder="Jane Doe"
+                      className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                     Phone (Optional)
                   </label>
                   <div className="relative">
@@ -132,7 +163,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full bg-slate-800/80 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                     />
                   </div>
                 </div>
@@ -140,7 +171,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Email Address
               </label>
               <div className="relative">
@@ -150,14 +181,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  placeholder="name@company.com"
+                  className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1">
+              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Password
               </label>
               <div className="relative">
@@ -168,7 +199,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-slate-800/80 border border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
                 />
               </div>
             </div>
@@ -176,85 +207,47 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium rounded-lg shadow-md transition flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : mode === 'login' ? (
-                'Sign In'
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
-                'Create Account'
+                <>
+                  <span>{mode === 'login' ? 'Sign In to SpaceBook' : 'Create Free Account'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
               )}
             </button>
           </form>
 
-          {/* Quick Demo Helper */}
-          {mode === 'login' && (
-            <div className="mt-5 p-3 rounded-xl bg-slate-800/50 border border-slate-700/60 text-xs">
-              <div className="flex items-center gap-1.5 text-indigo-300 font-semibold mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Fill Test Credentials:</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo('sarath@example.com')}
-                  className="px-2 py-1.5 bg-slate-700/60 hover:bg-slate-700 rounded-lg text-slate-200 transition text-center"
-                >
-                  <span className="block font-medium">Owner</span>
-                  <span className="text-[10px] text-slate-400">sarath@</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo('sarath5@example.com')}
-                  className="px-2 py-1.5 bg-slate-700/60 hover:bg-slate-700 rounded-lg text-slate-200 transition text-center"
-                >
-                  <span className="block font-medium">Admin</span>
-                  <span className="text-[10px] text-slate-400">sarath5@</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleFillDemo('sarath4@example.com')}
-                  className="px-2 py-1.5 bg-slate-700/60 hover:bg-slate-700 rounded-lg text-slate-200 transition text-center"
-                >
-                  <span className="block font-medium">Customer</span>
-                  <span className="text-[10px] text-slate-400">sarath4@</span>
-                </button>
-              </div>
+          {/* Quick Demo Autofill section */}
+          <div className="mt-6 pt-5 border-t border-slate-100">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+              Instant Demo Fill:
+            </p>
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleFillDemo('sarath@example.com')}
+                className="px-2 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-[11px] font-semibold text-slate-700 text-center truncate"
+              >
+                Owner
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFillDemo('sarath5@example.com')}
+                className="px-2 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-[11px] font-semibold text-slate-700 text-center truncate"
+              >
+                Admin
+              </button>
+              <button
+                type="button"
+                onClick={() => handleFillDemo('sarath4@example.com')}
+                className="px-2 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-[11px] font-semibold text-slate-700 text-center truncate"
+              >
+                Guest
+              </button>
             </div>
-          )}
-
-          {/* Mode switch */}
-          <div className="mt-5 text-center text-xs text-slate-400">
-            {mode === 'login' ? (
-              <p>
-                Don't have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode('register');
-                    setError(null);
-                  }}
-                  className="text-indigo-400 hover:text-indigo-300 font-medium ml-1 underline underline-offset-2"
-                >
-                  Register here
-                </button>
-              </p>
-            ) : (
-              <p>
-                Already have an account?{' '}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode('login');
-                    setError(null);
-                  }}
-                  className="text-indigo-400 hover:text-indigo-300 font-medium ml-1 underline underline-offset-2"
-                >
-                  Sign in
-                </button>
-              </p>
-            )}
           </div>
         </div>
       </div>

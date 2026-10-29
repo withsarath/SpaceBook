@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { ownerApplicationsApi } from '../api';
 import type { OwnerApplication } from '../types';
-import { Sparkles, CheckCircle2, Clock, XCircle, Send, AlertCircle } from 'lucide-react';
+import {
+  Sparkles,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  AlertCircle,
+  DollarSign,
+  ShieldCheck,
+  Calendar,
+  ArrowRight,
+} from 'lucide-react';
 
 interface BecomeOwnerViewProps {
   onSuccess: () => void;
@@ -47,7 +57,7 @@ export const BecomeOwnerView: React.FC<BecomeOwnerViewProps> = ({
         description,
         reason,
       });
-      setSuccessMsg('Application submitted successfully! Our administrators will review it shortly.');
+      setSuccessMsg('Application submitted! Our host curation team will review your application within 24 hours.');
       await fetchStatus();
       onSuccess();
     } catch (err: any) {
@@ -59,156 +69,207 @@ export const BecomeOwnerView: React.FC<BecomeOwnerViewProps> = ({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="w-8 h-8 border-3 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-3" />
-        <p className="text-sm text-slate-400">Checking your application status...</p>
+      <div className="flex flex-col items-center justify-center py-28">
+        <div className="w-8 h-8 border-3 border-slate-300 border-t-slate-900 rounded-full animate-spin mb-3" />
+        <p className="text-xs text-slate-500 font-medium">Checking host status...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>SpaceBook Partner Program</span>
+    <div className="max-w-4xl mx-auto space-y-10">
+      {/* Editorial Host Hero */}
+      <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm relative overflow-hidden">
+        <div className="max-w-2xl relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Host Partner Program</span>
+          </div>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            Turn your empty desks and lofts into steady monthly income.
+          </h1>
+
+          <p className="mt-3 text-slate-600 text-sm sm:text-base leading-relaxed">
+            Join thousands of hosts welcoming creators, startups, and remote teams. Set your own hours, pricing, and rules.
+          </p>
         </div>
-        <h1 className="text-3xl font-extrabold text-white">
-          Become a Workspace Host
-        </h1>
-        <p className="text-slate-400 text-sm max-w-lg mx-auto">
-          Monetize your empty desks, conference rooms, and creative studios. Join hundreds of space owners on SpaceBook.
-        </p>
-      </div>
 
-      {/* Application Status Banner if already applied */}
-      {application && (
-        <div
-          className={`p-6 rounded-2xl border ${
-            application.status === 'pending'
-              ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-              : application.status === 'approved'
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
-              : 'bg-rose-500/10 border-rose-500/30 text-rose-200'
-          }`}
-        >
-          <div className="flex items-start gap-4">
-            {application.status === 'pending' && (
-              <Clock className="w-7 h-7 text-amber-400 shrink-0 mt-0.5" />
-            )}
-            {application.status === 'approved' && (
-              <CheckCircle2 className="w-7 h-7 text-emerald-400 shrink-0 mt-0.5" />
-            )}
-            {application.status === 'rejected' && (
-              <XCircle className="w-7 h-7 text-rose-400 shrink-0 mt-0.5" />
-            )}
+        {/* Value Pillars */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-slate-100">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-rose-500 shrink-0">
+              <DollarSign className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Guaranteed Payouts</h4>
+              <p className="text-[11px] text-slate-500">Direct deposits processed weekly with automated invoicing.</p>
+            </div>
+          </div>
 
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold">
-                {application.status === 'pending' && 'Application Under Review'}
-                {application.status === 'approved' && 'Application Approved!'}
-                {application.status === 'rejected' && 'Application Needs Updates'}
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                {application.status === 'pending' &&
-                  `Your application for "${application.businessName}" was submitted on ${new Date(
-                    application.createdAt,
-                  ).toLocaleDateString()}. Our team is actively reviewing it.`}
-                {application.status === 'approved' &&
-                  'Congratulations! You have been granted Host/Owner access. You can now publish spaces in the Owner Hub.'}
-                {application.status === 'rejected' &&
-                  `Reason for rejection: ${
-                    application.rejectionReason || 'Did not meet requirements'
-                  }. You can submit a revised application below.`}
-              </p>
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-rose-500 shrink-0">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Verified Guests</h4>
+              <p className="text-[11px] text-slate-500">Every attendee is identity-verified before reserving.</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-rose-500 shrink-0">
+              <Calendar className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-900">Total Flexibility</h4>
+              <p className="text-[11px] text-slate-500">Block blackout dates and set custom hourly or day rates.</p>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Show Application Form if no application or if rejected */}
-      {(!application || application.status === 'rejected') && (
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl">
-          <h2 className="text-xl font-bold text-white mb-2">
-            Submit Host Application
-          </h2>
-          <p className="text-xs text-slate-400 mb-6">
-            Please tell us about your company and workspace facilities.
-          </p>
+      {/* Application Status or Application Form */}
+      {application ? (
+        <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+          <div className="text-center max-w-md mx-auto space-y-4">
+            {application.status === 'pending' && (
+              <>
+                <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto text-amber-600 border border-amber-200">
+                  <Clock className="w-7 h-7" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    Application Under Review
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-900 mt-2">
+                    Thanks for applying, {application.businessName}!
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    Our curation team is reviewing your workspace portfolio. You will receive an email notification as soon as your host status is verified.
+                  </p>
+                </div>
+              </>
+            )}
 
-          {error && (
-            <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-2 text-rose-300 text-sm">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              <span>{error}</span>
+            {application.status === 'approved' && (
+              <>
+                <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto text-emerald-600 border border-emerald-200">
+                  <CheckCircle2 className="w-7 h-7" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Host Verified
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-900 mt-2">
+                    Congratulations! You are an approved SpaceBook host.
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    You have full access to the Host Hub. Start adding your properties and publishing your available booking slots.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {application.status === 'rejected' && (
+              <>
+                <div className="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-600 border border-rose-200">
+                  <XCircle className="w-7 h-7" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                    Application Declined
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-900 mt-2">
+                    Application Status Update
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Reason: {application.rejectionReason || 'Does not currently meet host verification criteria.'}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-10 shadow-sm">
+          <div className="max-w-xl mx-auto">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-slate-900">
+                Apply to Become a Verified Host
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Tell us about your spaces and company. Review takes under 24 hours.
+              </p>
             </div>
-          )}
 
-          {successMsg && (
-            <div className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-emerald-300 text-sm">
-              <CheckCircle2 className="w-5 h-5 shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-2 text-rose-700 text-xs">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Business or Company Name
-              </label>
-              <input
-                type="text"
-                required
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                placeholder="e.g. Nexus Coworking LLC"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
-              />
-            </div>
+            {successMsg && (
+              <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2 text-emerald-800 text-xs">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <span>{successMsg}</span>
+              </div>
+            )}
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Business Description
-              </label>
-              <textarea
-                required
-                rows={3}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your facilities, seating capacity, target community..."
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none"
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Business / Property Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder="e.g. Skyline Workspace Collective LLC"
+                  className="w-full text-xs font-semibold px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                />
+              </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-                Why do you want to list on SpaceBook?
-              </label>
-              <textarea
-                required
-                rows={2}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder="e.g. Looking to connect with remote tech workers and fill unused desk capacity"
-                className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 resize-none"
-              />
-            </div>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Overview of Your Spaces
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the type of spaces you manage (e.g. 5 meeting rooms, 2 creative daylight lofts in central London)..."
+                  className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none"
+                />
+              </div>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-2"
-            >
-              {submitting ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  Submit Application for Review
-                </>
-              )}
-            </button>
-          </form>
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Why do you want to partner with SpaceBook?
+                </label>
+                <textarea
+                  rows={2}
+                  required
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder="e.g. Looking to monetize surplus boardroom capacity on weekdays..."
+                  className="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center justify-center gap-2"
+              >
+                {submitting ? 'Submitting Application...' : 'Submit Host Application'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>
