@@ -197,3 +197,4 @@ The application includes an instant **Demo Switcher** in the top navigation bar 
 
 ## 📄 License
 This project is open-source under the MIT License.
+
