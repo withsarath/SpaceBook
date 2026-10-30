@@ -38,6 +38,14 @@ export class OwnerApplicationService {
     return ownerApplication[0];
   }
 
+  async getMyApplication(userId: string) {
+    const application = await db.query.ownerApplications.findFirst({
+      where: eq(ownerApplications.userId, userId),
+      orderBy: desc(ownerApplications.createdAt),
+    });
+    return application || null;
+  }
+
   async getPendingApplication() {
     return db
       .select({

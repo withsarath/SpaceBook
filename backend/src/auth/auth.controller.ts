@@ -25,8 +25,8 @@ export class AuthController {
   // only authenticated users can access this route
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async me(@Req() req: Request) {
-    return req.user;
+  async me(@Req() req: Request & { user: { userId: string; email: string } }) {
+    return await this.authservice.getProfile(req.user.userId);
   }
 
   @Post('refresh')

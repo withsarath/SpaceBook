@@ -103,6 +103,15 @@ export class AuthService {
       .set({ refreshTokenHash })
       .where(eq(users.id, user.id));
 
+    // fetch assigned roles
+    const userRolesList = await db
+      .select({ roleName: roles.name })
+      .from(userRoles)
+      .innerJoin(roles, eq(userRoles.roleId, roles.id))
+      .where(eq(userRoles.userId, user.id));
+
+    const roleNames = userRolesList.map((r) => r.roleName);
+
     return {
       accessToken,
       refreshToken,
@@ -110,9 +119,39 @@ export class AuthService {
       name: user.name,
       email: user.email,
       phone: user.phone,
+      roles: roleNames,
       isActive: user.isActive,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+    };
+  }
+
+  // Get current user profile with roles
+  async getProfile(userId: string) {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const userRolesList = await db
+      .select({ roleName: roles.name })
+      .from(userRoles)
+      .innerJoin(roles, eq(userRoles.roleId, roles.id))
+      .where(eq(userRoles.userId, user.id));
+
+    const roleNames = userRolesList.map((r) => r.roleName);
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      roles: roleNames,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
     };
   }
 

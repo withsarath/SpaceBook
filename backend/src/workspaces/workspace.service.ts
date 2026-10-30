@@ -11,6 +11,29 @@ export class WorkspaceService {
     const result = await db.select().from(workspaces);
     return result;
   }
+
+  async getMyWorkspaces(userId: string) {
+    const result = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.ownerId, userId));
+    return result;
+  }
+
+  async getWorkspaceById(id: string) {
+    const workspace = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, id))
+      .limit(1);
+
+    if (workspace.length === 0) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    return workspace[0];
+  }
+
   async createWorkspace(userId: string, dto: CreateWorkspaceDto) {
     const [workspace] = await db
       .insert(workspaces)
