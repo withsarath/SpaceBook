@@ -74,6 +74,6 @@ export class WorkspaceController {
     @Param('id') id: string,
     @Req() req: Request & { user: { userId: string; email: string } },
   ) {
-    return this.workspaceService.deleteWorkspce(id, req.user.userId)
+    return this.workspaceService.deleteWorkspace(id, req.user.userId);
   }
 }

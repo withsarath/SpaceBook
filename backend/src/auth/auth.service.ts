@@ -73,12 +73,12 @@ export class AuthService {
       where: eq(users.email, dto.email),
     });
     if (!user) {
-      throw new UnauthorizedException('Invaild Email or Password');
+      throw new UnauthorizedException('Invalid Email or Password');
     }
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
 
     if (!isMatch) {
-      throw new UnauthorizedException('Invaild email or password');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     // Creating accesstoken with shorter lifespan

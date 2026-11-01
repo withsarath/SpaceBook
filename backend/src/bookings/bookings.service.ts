@@ -1,12 +1,13 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { db } from '../database/db';
 import { bookings, users, workspaces } from '../database/schema';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, or } from 'drizzle-orm';
 import { CreateBookingDto } from './dto/create-booking.dto';
 
 @Injectable()
@@ -28,7 +29,30 @@ export class BookingsService {
       throw new BadRequestException('This workspace is currently inactive');
     }
 
-    // 2. Insert booking into database
+    // 2. Check for overlapping bookings on the same workspace and date
+    const existingBookings = await db
+      .select()
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.workspaceId, dto.workspaceId),
+          eq(bookings.bookingDate, dto.bookingDate),
+          eq(bookings.status, 'confirmed'),
+        ),
+      );
+
+    for (const existing of existingBookings) {
+      // Two bookings overlap if one starts before the other ends and ends after the other starts
+      const hasOverlap =
+        dto.startTime < existing.endTime && dto.endTime > existing.startTime;
+      if (hasOverlap) {
+        throw new ConflictException(
+          `This workspace is already booked for ${existing.startTime} - ${existing.endTime} on ${dto.bookingDate}. Please choose a different time slot.`,
+        );
+      }
+    }
+
+    // 3. Insert booking into database
     const [newBooking] = await db
       .insert(bookings)
       .values({

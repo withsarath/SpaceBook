@@ -8,7 +8,10 @@ import { UpdateWorkspaceDto } from './dto/update-workspaces.dto';
 @Injectable()
 export class WorkspaceService {
   async getAllWorkspaces() {
-    const result = await db.select().from(workspaces);
+    const result = await db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.isActive, true));
     return result;
   }
 
@@ -94,7 +97,7 @@ export class WorkspaceService {
     return workspace;
   }
 
-  async deleteWorkspce(id: string, userId: string) {
+  async deleteWorkspace(id: string, userId: string) {
     const existWorkspace = await db
       .select()
       .from(workspaces)
