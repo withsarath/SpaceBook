@@ -47,56 +47,7 @@
 * **Validation**: `class-validator` & `class-transformer`
 * **Package Manager**: pnpm
 
----
 
-## 📁 Repository Structure
-
-```text
-SpaceBook/
-├── backend/
-│   ├── src/
-│   │   ├── auth/                 # JWT Authentication, login, register, guards
-│   │   ├── bookings/             # Booking creation, cancellations, schedule queries
-│   │   ├── database/             # Drizzle ORM schema, migrations, and seed scripts
-│   │   ├── owner-application/    # Host onboarding & admin review service
-│   │   ├── workspaces/           # Workspace CRUD and query endpoints
-│   │   ├── app.module.ts         # Root NestJS application module
-│   │   └── main.ts               # Application entry point & CORS configuration
-│   └── package.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── AdminDashboardView.tsx   # Host application curation panel
-│   │   │   ├── AuthModal.tsx            # Sign in / Register modal with demo logins
-│   │   │   ├── BecomeOwnerView.tsx      # Host partner onboarding form
-│   │   │   ├── MyBookingsView.tsx       # User reservations management
-│   │   │   ├── Navbar.tsx               # Header with search pill, role switcher, auth
-│   │   │   ├── OwnerDashboardView.tsx   # Host property listings & calendar
-│   │   │   ├── WorkspaceList.tsx        # Search, filters, categories, and space cards
-│   │   │   └── WorkspaceModal.tsx       # Sticky reservation card with live calculator
-│   │   ├── utils/
-│   │   │   └── workspaceHelpers.ts      # Architectural photography & data enrichers
-│   │   ├── api.ts                       # Typed HTTP client for all backend routes
-│   │   ├── types.ts                     # Core TypeScript interfaces
-│   │   ├── App.tsx                      # Root application layout & routing
-│   │   └── main.tsx                     # React root mount
-│   ├── index.html
-│   └── vite.config.ts
-│
-└── README.md
-```
-
----
-
-## 🏁 Getting Started
-
-### Prerequisites
-* [Node.js](https://nodejs.org/) (v18 or higher)
-* [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
-* A PostgreSQL instance (or free serverless database like [Neon](https://neon.tech))
-
----
 
 ### 1. Clone the Repository
 ```bash
@@ -162,16 +113,6 @@ cd SpaceBook
    *The frontend will run at:* `http://localhost:5173`
 
 ---
-
-## 🔑 Demo Accounts for Testing
-
-The application includes an instant **Demo Switcher** in the top navigation bar to test different role permissions:
-
-| Role | Email | Password | Access Capabilities |
-| :--- | :--- | :--- | :--- |
-| **Owner (Host)** | `sarath@example.com` | `password123` | Add/edit workspaces, view bookings, track earnings |
-| **Admin** | `sarath5@example.com` | `password123` | Review & approve/reject host applications |
-| **Customer (Guest)**| `sarath4@example.com` | `password123` | Reserve workspaces, manage bookings, cancel slots |
 
 ---
 
